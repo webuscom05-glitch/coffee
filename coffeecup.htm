@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UMBER — Specialty Coffee</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Mono:wght@300;400&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --cream: #F2E8D5;
+  --parchment: #E8D9BC;
+  --ink: #0D0A06;
+  --espresso: #1C0F05;
+  --roast: #3D1A08;
+  --amber: #B8621A;
+  --gold: #C9952E;
+  --gold-light: #E4B84A;
+  --mist: #7A6654;
+  --smoke: #9C8A78;
+  --dark-bg: #0A0603;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--dark-bg);
+  color: var(--cream);
+  font-family: 'DM Mono', monospace;
+  font-weight: 300;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── CURSOR ── */
+#cur { position:fixed; width:8px; height:8px; background:var(--gold); border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:width .25s,height .25s,background .25s; mix-blend-mode:screen; }
+#cur-r { position:fixed; width:40px; height:40px; border:1px solid rgba(201,149,46,.5); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:width .3s,height .3s; }
+body:hover #cur { opacity:1; }
+
+/* ── GRAIN ── */
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:9000; opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── NAV ── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:500;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:30px 64px;
+  transition: background .5s, backdrop-filter .5s, padding .5s;
+}
+nav.scrolled {
+  background:rgba(10,6,3,.85); backdrop-filter:blur(20px);
+  padding:18px 64px; border-bottom:1px solid rgba(201,149,46,.12);
+}
+.nav-logo {
+  font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:600;
+  letter-spacing:.22em; text-transform:uppercase; color:var(--gold-light);
+}
+.nav-logo span { color:var(--cream); opacity:.5; font-weight:300; }
+.nav-links { display:flex; gap:44px; list-style:none; }
+.nav-links a { font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; text-decoration:none; color:rgba(242,232,213,.45); transition:color .3s; }
+.nav-links a:hover { color:var(--gold-light); }
+.nav-cta {
+  font-size:9px; letter-spacing:.22em; text-transform:uppercase;
+  border:1px solid var(--gold); padding:11px 28px; color:var(--gold);
+  text-decoration:none; transition:all .35s;
+}
+.nav-cta:hover { background:var(--gold); color:var(--espresso); }
+
+/* ── HERO ── */
+.hero {
+  position:relative; width:100%; height:100vh; overflow:hidden;
+  display:flex; align-items:center;
+}
+
+#hero-canvas {
+  position:absolute; inset:0; width:100%; height:100%;
+  z-index:1;
+}
+
+.hero-bg-img {
+  position:absolute; inset:0; z-index:0;
+  background: linear-gradient(135deg, #0A0603 0%, #1C0F05 40%, #0D0A06 100%);
+}
+
+.hero-content {
+  position:relative; z-index:10;
+  padding:0 64px;
+  max-width:650px;
+  margin-top:40px;
+}
+
+.hero-badge {
+  display:inline-flex; align-items:center; gap:12px;
+  background:rgba(201,149,46,.1); border:1px solid rgba(201,149,46,.25);
+  padding:8px 20px; margin-bottom:36px;
+  opacity:0; animation: fadeUp .9s ease .3s forwards;
+}
+.hero-badge-dot { width:6px; height:6px; background:var(--gold); border-radius:50%; animation:blink 2s ease infinite; }
+.hero-badge span { font-size:9px; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); }
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.hero-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(68px,8.5vw,130px);
+  font-weight:300; line-height:.88;
+  color:var(--cream);
+  margin-bottom:36px;
+  opacity:0; animation: fadeUp 1s ease .5s forwards;
+}
+.hero-title em {
+  font-style:italic; color:transparent;
+  -webkit-text-stroke:1px var(--gold);
+  display:block;
+}
+.hero-title strong {
+  font-weight:600; color:var(--gold-light); font-style:normal;
+}
+
+.hero-line {
+  width:60px; height:1px; background:var(--gold); margin-bottom:28px;
+  opacity:0; animation: fadeUp .8s ease .7s forwards;
+}
+
+.hero-sub {
+  font-size:11px; line-height:2; color:rgba(242,232,213,.5);
+  max-width:400px; margin-bottom:52px;
+  opacity:0; animation: fadeUp .9s ease .8s forwards;
+}
+
+.hero-btns {
+  display:flex; gap:20px; align-items:center;
+  opacity:0; animation: fadeUp .9s ease 1s forwards;
+}
+
+.btn-primary {
+  position:relative; overflow:hidden;
+  background:var(--gold); color:var(--espresso);
+  font-family:'DM Mono',monospace; font-size:9.5px;
+  letter-spacing:.25em; text-transform:uppercase;
+  padding:18px 44px; text-decoration:none;
+  transition: transform .3s;
+}
+.btn-primary::before {
+  content:''; position:absolute; inset:0;
+  background:var(--gold-light); transform:scaleX(0); transform-origin:left;
+  transition:transform .4s cubic-bezier(.77,0,.18,1);
+}
+.btn-primary:hover::before { transform:scaleX(1); }
+.btn-primary span { position:relative; z-index:1; }
+.btn-primary:hover { transform:translateY(-2px); }
+
+.btn-ghost {
+  font-size:9.5px; letter-spacing:.22em; text-transform:uppercase;
+  color:rgba(242,232,213,.55); text-decoration:none;
+  border-bottom:1px solid rgba(242,232,213,.2); padding-bottom:3px;
+  transition:all .3s;
+}
+.btn-ghost:hover { color:var(--cream); border-color:var(--cream); }
+
+.hero-scroll {
+  position:absolute; bottom:40px; left:64px; z-index:10;
+  display:flex; align-items:center; gap:16px;
+  opacity:0; animation: fadeIn 1s ease 1.5s forwards;
+}
+.scroll-line { width:40px; height:1px; background:rgba(201,149,46,.4); }
+.scroll-text { font-size:8.5px; letter-spacing:.3em; text-transform:uppercase; color:rgba(242,232,213,.3); }
+
+/* Hero right - 3D canvas area */
+.hero-3d-area {
+  position:absolute; right:0; top:0; bottom:0; width:55%; z-index:5;
+}
+.hero-3d-label {
+  position:absolute; bottom:100px; right:80px; z-index:20;
+  text-align:right; opacity:0; animation: fadeIn 1s ease 1.8s forwards;
+}
+.hero-3d-label .origin { font-size:9px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); margin-bottom:6px; }
+.hero-3d-label .blend { font-family:'Cormorant Garamond',serif; font-size:28px; font-style:italic; color:var(--cream); }
+
+/* ── MARQUEE ── */
+.marquee-wrap { background:var(--gold); padding:14px 0; overflow:hidden; }
+.marquee-track { display:flex; width:max-content; animation:marquee 30s linear infinite; }
+.marquee-item { font-size:9.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--espresso); padding:0 40px; white-space:nowrap; font-weight:400; }
+.marquee-div { color:rgba(28,15,5,.3); margin:0 -10px; }
+
+/* ── FEATURE STRIP ── */
+.strip {
+  background:var(--espresso); padding:0 64px;
+  display:grid; grid-template-columns:repeat(4,1fr);
+  border-top:1px solid rgba(201,149,46,.1);
+}
+.strip-item {
+  padding:52px 40px; border-right:1px solid rgba(201,149,46,.08);
+  transition:background .3s;
+}
+.strip-item:last-child { border-right:none; }
+.strip-item:hover { background:rgba(201,149,46,.05); }
+.strip-num {
+  font-family:'Cormorant Garamond',serif; font-size:52px; font-weight:300;
+  color:var(--gold); line-height:1; margin-bottom:12px;
+  display:block;
+}
+.strip-label { font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:rgba(242,232,213,.4); }
+
+/* ── SECTION BASE ── */
+.s-eyebrow {
+  display:flex; align-items:center; gap:16px;
+  font-size:9px; letter-spacing:.32em; text-transform:uppercase;
+  color:var(--gold); margin-bottom:28px;
+}
+.s-eyebrow::before { content:''; width:36px; height:1px; background:var(--gold); flex-shrink:0; }
+
+.s-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(44px,4.5vw,72px); font-weight:300; line-height:1.05;
+  color:var(--cream);
+}
+.s-title em { font-style:italic; color:var(--gold-light); }
+.s-title strong { font-weight:600; }
+
+/* ── STORY ── */
+.story {
+  background:var(--dark-bg); padding:140px 64px;
+  display:grid; grid-template-columns:1fr 1fr; gap:100px; align-items:center;
+  position:relative; overflow:hidden;
+}
+.story::before {
+  content:''; position:absolute; right:-200px; top:50%; transform:translateY(-50%);
+  width:500px; height:500px; border-radius:50%;
+  background:radial-gradient(circle, rgba(201,149,46,.08) 0%, transparent 70%);
+  pointer-events:none;
+}
+
+.story-imgs {
+  position:relative; height:580px;
+}
+.story-img-main {
+  position:absolute; right:0; top:0; width:75%; height:80%;
+  overflow:hidden;
+}
+.story-img-main img {
+  width:100%; height:100%; object-fit:cover;
+  filter:contrast(1.05) brightness(.95);
+  transition:transform 8s ease;
+}
+.story-img-main:hover img { transform:scale(1.04); }
+
+.story-img-accent {
+  position:absolute; left:0; bottom:0; width:52%; height:52%;
+  overflow:hidden;
+  border:3px solid var(--dark-bg);
+}
+.story-img-accent img {
+  width:100%; height:100%; object-fit:cover;
+  filter:contrast(1.05) saturate(.9);
+}
+
+.story-gold-tag {
+  position:absolute; right:0; bottom:80px;
+  background:var(--gold); padding:20px 28px;
+  writing-mode:vertical-rl; text-orientation:mixed;
+  font-size:9px; letter-spacing:.25em; text-transform:uppercase;
+  color:var(--espresso);
+}
+
+.story-right { }
+.story-body { font-size:11.5px; line-height:2.1; color:rgba(242,232,213,.5); margin:28px 0 48px; }
+
+.story-stats {
+  display:grid; grid-template-columns:1fr 1fr; gap:1px;
+  background:rgba(242,232,213,.06); margin-top:56px;
+}
+.s-stat {
+  background:var(--dark-bg); padding:32px 28px;
+  transition:background .3s;
+}
+.s-stat:hover { background:rgba(201,149,46,.06); }
+.s-stat-n {
+  font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:300;
+  color:var(--gold-light); line-height:1; display:block;
+}
+.s-stat-l { font-size:9px; letter-spacing:.15em; text-transform:uppercase; color:rgba(242,232,213,.35); margin-top:8px; display:block; }
+
+/* ── MENU ── */
+.menu-sec {
+  background:#0E0905; padding:140px 64px; position:relative; overflow:hidden;
+}
+.menu-sec::before {
+  content:'MENU'; position:absolute;
+  font-family:'Cormorant Garamond',serif; font-size:280px; font-weight:600;
+  color:rgba(255,255,255,.02); top:50%; left:50%; transform:translate(-50%,-50%);
+  white-space:nowrap; pointer-events:none; letter-spacing:.15em;
+}
+
+.menu-header {
+  display:flex; justify-content:space-between; align-items:flex-end;
+  margin-bottom:80px;
+}
+
+.menu-tabs { display:flex; gap:4px; }
+.tab {
+  font-size:9px; letter-spacing:.2em; text-transform:uppercase;
+  padding:10px 24px; background:transparent;
+  border:1px solid rgba(242,232,213,.1); color:rgba(242,232,213,.35);
+  cursor:none; transition:all .3s;
+}
+.tab.active, .tab:hover { border-color:var(--gold); color:var(--gold); background:rgba(201,149,46,.08); }
+
+.menu-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+  background:rgba(255,255,255,.04);
+}
+
+.m-card {
+  background:#0E0905; padding:52px 44px;
+  transition:all .4s cubic-bezier(.23,1,.32,1);
+  position:relative; overflow:hidden; cursor:none;
+}
+.m-card::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, transparent, var(--gold), transparent);
+  transform:scaleX(0); transition:transform .4s;
+}
+.m-card:hover { background:#161008; transform:translateY(-6px); z-index:2; box-shadow:0 30px 80px rgba(0,0,0,.6); }
+.m-card:hover::after { transform:scaleX(1); }
+
+.m-img {
+  width:100%; height:200px; object-fit:cover; margin-bottom:32px;
+  filter:brightness(.8) contrast(1.1) saturate(.85);
+  transition:filter .4s, transform .6s;
+}
+.m-card:hover .m-img { filter:brightness(.95) contrast(1.05) saturate(1); transform:scale(1.02); }
+
+.m-tag {
+  font-size:8.5px; letter-spacing:.25em; text-transform:uppercase;
+  color:var(--gold); margin-bottom:14px;
+}
+.m-name {
+  font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:400;
+  color:var(--cream); margin-bottom:14px; line-height:1.2;
+}
+.m-desc { font-size:10px; line-height:1.9; color:rgba(242,232,213,.35); margin-bottom:32px; }
+.m-footer { display:flex; align-items:center; justify-content:space-between; }
+.m-price {
+  font-family:'Cormorant Garamond',serif; font-size:24px; color:var(--gold-light);
+}
+.m-add {
+  width:36px; height:36px; border:1px solid rgba(201,149,46,.3);
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; color:var(--gold); transition:all .3s; cursor:none;
+}
+.m-card:hover .m-add { background:var(--gold); color:var(--espresso); }
+
+/* ── FULL BLEED IMG SECTION ── */
+.full-bleed {
+  position:relative; height:70vh; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+}
+.full-bleed img {
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  filter:brightness(.35) contrast(1.15);
+  transform:scale(1.05);
+  transition:transform 12s ease;
+}
+.full-bleed:hover img { transform:scale(1); }
+.full-bleed-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to right, rgba(10,6,3,.8) 0%, rgba(10,6,3,.2) 60%, transparent 100%);
+}
+.full-bleed-content { position:relative; z-index:2; text-align:center; padding:0 64px; }
+.full-bleed-content .s-title { font-size:clamp(56px,7vw,110px); line-height:.9; }
+.full-bleed-quote {
+  font-family:'Cormorant Garamond',serif; font-size:clamp(20px,2.5vw,36px);
+  font-style:italic; color:rgba(242,232,213,.7); margin-top:24px; max-width:600px; margin:24px auto 0;
+}
+
+/* ── PROCESS ── */
+.process { background:var(--espresso); padding:140px 64px; }
+.process-grid {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:0;
+  margin-top:80px;
+}
+.proc-step {
+  padding:52px 40px; border-right:1px solid rgba(201,149,46,.1);
+  position:relative; transition:background .3s;
+}
+.proc-step:last-child { border-right:none; }
+.proc-step:hover { background:rgba(201,149,46,.06); }
+.proc-num {
+  font-family:'Cormorant Garamond',serif; font-size:80px; font-weight:300;
+  color:rgba(201,149,46,.15); line-height:1; margin-bottom:-20px; display:block;
+}
+.proc-icon { font-size:32px; margin-bottom:20px; display:block; }
+.proc-title {
+  font-family:'Cormorant Garamond',serif; font-size:22px;
+  color:var(--cream); margin-bottom:14px;
+}
+.proc-text { font-size:10px; line-height:1.9; color:rgba(242,232,213,.35); }
+.proc-line {
+  position:absolute; top:70px; right:-1px; width:1px; height:40px;
+  background:var(--gold); opacity:0; transition:opacity .3s;
+}
+.proc-step:hover .proc-line { opacity:.6; }
+
+/* ── ORIGIN IMMERSIVE ── */
+.origin-sec {
+  background:var(--dark-bg); padding:140px 64px;
+  display:grid; grid-template-columns:.9fr 1.1fr; gap:80px; align-items:center;
+}
+.origin-visual {
+  position:relative; aspect-ratio:3/4; overflow:hidden;
+}
+.origin-visual img {
+  width:100%; height:100%; object-fit:cover;
+  filter:contrast(1.1) sepia(.15);
+  transition:transform 8s ease;
+}
+.origin-visual:hover img { transform:scale(1.05); }
+.origin-visual::before {
+  content:''; position:absolute; inset:0; z-index:1;
+  background:linear-gradient(to bottom, transparent 60%, rgba(10,6,3,.9) 100%);
+}
+.origin-badge {
+  position:absolute; bottom:40px; left:40px; z-index:2;
+  background:var(--gold); padding:16px 24px;
+}
+.origin-badge-num {
+  font-family:'Cormorant Garamond',serif; font-size:42px; font-weight:300;
+  color:var(--espresso); line-height:1; display:block;
+}
+.origin-badge-label {
+  font-size:8.5px; letter-spacing:.2em; text-transform:uppercase;
+  color:rgba(28,15,5,.7); display:block; margin-top:4px;
+}
+
+.origin-list-title {
+  font-family:'Cormorant Garamond',serif; font-size:clamp(36px,3vw,54px);
+  color:var(--cream); margin:24px 0 44px; font-weight:300; line-height:1.1;
+}
+
+.origin-rows { border-top:1px solid rgba(242,232,213,.08); }
+.o-row {
+  display:grid; grid-template-columns:1fr auto;
+  padding:24px 0; border-bottom:1px solid rgba(242,232,213,.08);
+  transition:all .3s; cursor:none; gap:20px; align-items:center;
+}
+.o-row:hover { padding-left:12px; border-bottom-color:rgba(201,149,46,.3); }
+.o-country {
+  font-family:'Cormorant Garamond',serif; font-size:22px;
+  color:var(--cream); display:block; margin-bottom:6px;
+  transition:color .3s;
+}
+.o-row:hover .o-country { color:var(--gold-light); }
+.o-detail { font-size:9.5px; color:rgba(242,232,213,.35); letter-spacing:.1em; }
+.o-alt { font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--gold); font-style:italic; }
+
+/* ── TESTIMONIALS ── */
+.testi-sec { background:#0B0806; padding:140px 64px; position:relative; overflow:hidden; }
+.testi-sec::before {
+  content:'"'; position:absolute;
+  font-family:'Cormorant Garamond',serif; font-size:500px;
+  color:rgba(201,149,46,.05); top:-120px; left:20px;
+  line-height:1; pointer-events:none; font-weight:600;
+}
+.testi-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+  background:rgba(255,255,255,.04); margin-top:80px;
+}
+.t-card {
+  background:#0B0806; padding:52px 44px;
+  transition:background .35s, transform .35s;
+}
+.t-card:hover { background:#12100B; transform:translateY(-4px); }
+.t-stars { color:var(--gold); letter-spacing:4px; font-size:11px; margin-bottom:28px; }
+.t-text {
+  font-family:'Playfair Display',serif; font-size:15px; font-style:italic;
+  line-height:1.85; color:rgba(242,232,213,.75); margin-bottom:36px;
+}
+.t-author { display:flex; align-items:center; gap:16px; }
+.t-av {
+  width:46px; height:46px; border-radius:50%;
+  background:linear-gradient(135deg, var(--roast), var(--amber));
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Cormorant Garamond',serif; font-size:20px; color:var(--cream); flex-shrink:0;
+}
+.t-name { font-size:11px; color:var(--cream); display:block; margin-bottom:4px; letter-spacing:.05em; }
+.t-role { font-size:8.5px; letter-spacing:.18em; text-transform:uppercase; color:rgba(242,232,213,.3); }
+
+/* ── CTA ── */
+.cta-sec {
+  position:relative; height:90vh; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+}
+.cta-bg {
+  position:absolute; inset:0;
+}
+.cta-bg img {
+  width:100%; height:100%; object-fit:cover;
+  filter:brightness(.22) contrast(1.2);
+}
+.cta-bg::after {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse at center, rgba(61,26,8,.6) 0%, rgba(10,6,3,.85) 70%);
+}
+.cta-content { position:relative; z-index:2; text-align:center; padding:0 64px; }
+.cta-eyebrow {
+  font-size:9px; letter-spacing:.35em; text-transform:uppercase;
+  color:var(--gold); margin-bottom:24px; display:block;
+}
+.cta-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(60px,8vw,120px); font-weight:300; line-height:.9;
+  color:var(--cream); margin-bottom:28px;
+}
+.cta-title em { font-style:italic; color:var(--gold-light); }
+.cta-sub { font-size:11px; line-height:2; color:rgba(242,232,213,.4); margin-bottom:60px; }
+.cta-btns { display:flex; justify-content:center; gap:20px; }
+.btn-gold {
+  background:var(--gold); color:var(--espresso);
+  font-family:'DM Mono',monospace; font-size:9.5px;
+  letter-spacing:.25em; text-transform:uppercase;
+  padding:20px 52px; text-decoration:none;
+  transition:all .35s;
+}
+.btn-gold:hover { background:var(--gold-light); transform:translateY(-3px); }
+.btn-border {
+  border:1px solid rgba(242,232,213,.25); color:rgba(242,232,213,.6);
+  font-family:'DM Mono',monospace; font-size:9.5px;
+  letter-spacing:.25em; text-transform:uppercase;
+  padding:20px 52px; text-decoration:none;
+  transition:all .35s;
+}
+.btn-border:hover { border-color:var(--cream); color:var(--cream); }
+
+/* ── FOOTER ── */
+footer { background:#060402; padding:100px 64px 48px; }
+.footer-grid {
+  display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:70px;
+  margin-bottom:80px; padding-bottom:60px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.f-brand {
+  font-family:'Cormorant Garamond',serif; font-size:38px; font-weight:500;
+  color:var(--gold-light); letter-spacing:.12em; margin-bottom:18px; display:block;
+}
+.f-tagline { font-size:10px; line-height:1.9; color:rgba(242,232,213,.25); max-width:200px; margin-bottom:32px; }
+.f-socials { display:flex; gap:12px; }
+.f-soc {
+  width:38px; height:38px; border:1px solid rgba(255,255,255,.08);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; color:rgba(255,255,255,.3); text-decoration:none;
+  transition:all .3s;
+}
+.f-soc:hover { border-color:var(--gold); color:var(--gold); background:rgba(201,149,46,.08); }
+.f-col h4 { font-size:8.5px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold); margin-bottom:28px; }
+.f-col ul { list-style:none; }
+.f-col ul li { margin-bottom:14px; }
+.f-col ul li a { font-size:10.5px; color:rgba(255,255,255,.28); text-decoration:none; transition:color .3s; letter-spacing:.04em; }
+.f-col ul li a:hover { color:var(--cream); }
+.footer-bottom { display:flex; justify-content:space-between; align-items:center; }
+.f-copy { font-size:8.5px; letter-spacing:.15em; color:rgba(255,255,255,.15); text-transform:uppercase; }
+
+/* ── ANIMS ── */
+@keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+.reveal { opacity:0; transform:translateY(28px); transition:opacity .9s ease,transform .9s ease; }
+.reveal.in { opacity:1; transform:translateY(0); }
+.rd1{transition-delay:.1s} .rd2{transition-delay:.2s} .rd3{transition-delay:.3s} .rd4{transition-delay:.4s}
+
+/* Steam particles */
+#steam-canvas { position:absolute; inset:0; z-index:3; pointer-events:none; }
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-r"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">Umber<span> Coffee</span></div>
+  <ul class="nav-links">
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#process">Craft</a></li>
+    <li><a href="#origin">Origins</a></li>
+    <li><a href="#story">Story</a></li>
+  </ul>
+  <a href="#cta" class="nav-cta">Reserve a Table</a>
+</nav>
+
+<!-- ══════════════════════ HERO ══════════════════════ -->
+<section class="hero">
+  <div class="hero-bg-img"></div>
+  <canvas id="hero-canvas"></canvas>
+  <canvas id="steam-canvas"></canvas>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      <span>Est. 2009 · Specialty Roastery</span>
+    </div>
+    <h1 class="hero-title">
+      Where<br>Coffee<br><em>becomes</em><br><strong>Art</strong>
+    </h1>
+    <div class="hero-line"></div>
+    <p class="hero-sub">Single-origin micro-lots. Small-batch roasted. Every cup calibrated with obsessive precision — because ordinary is never an option.</p>
+    <div class="hero-btns">
+      <a href="#menu" class="btn-primary"><span>Explore Menu</span></a>
+      <a href="#story" class="btn-ghost">Our Story →</a>
+    </div>
+  </div>
+
+  <div class="hero-3d-area" id="hero-3d"></div>
+  <div class="hero-3d-label">
+    <div class="origin">House Blend · 2026</div>
+    <div class="blend">Dark Reserve</div>
+  </div>
+
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span class="scroll-text">Scroll to explore</span>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item">Specialty Espresso <span class="marquee-div">✦</span></span>
+    <span class="marquee-item">Ethiopian Yirgacheffe <span class="marquee-div">✦</span></span>
+    <span class="marquee-item">Cold Brew Reserve <span class="marquee-div">✦</span></span>
+    <span class="marquee-item">Direct Trade Farms <span class="marquee-div">✦</span></span>
+    <span class="marquee-item">Small Batch Roasted <span class="marquee-div">✦</span></span>
+    <span class="marquee-item">Yemeni Haraaz <span class="marquee-div">✦</span></span>
+    <span class="marquee-item">Nitro Cold Brew <span class="marquee-div">✦</span></span>
+    <span class="marquee-item">Colombian Huila <span class="marquee-div">✦</span></span>
+    <span class="marquee-item">Specialty Espresso <span class="marquee-div">✦</span></span>
+    <span class="marquee-item">Ethiopian Yirgacheffe <span class="marquee-div">✦</span></span>
+    <span class="marquee-item">Cold Brew Reserve <span class="marquee-div">✦</span></span>
+    <span class="marquee-item">Direct Trade Farms <span class="marquee-div">✦</span></span>
+    <span class="marquee-item">Small Batch Roasted <span class="marquee-div">✦</span></span>
+    <span class="marquee-item">Yemeni Haraaz <span class="marquee-div">✦</span></span>
+    <span class="marquee-item">Nitro Cold Brew <span class="marquee-div">✦</span></span>
+    <span class="marquee-item">Colombian Huila <span class="marquee-div">✦</span></span>
+  </div>
+</div>
+
+<!-- STRIP -->
+<div class="strip">
+  <div class="strip-item reveal">
+    <span class="strip-num">23+</span>
+    <span class="strip-label">Origin Farms</span>
+  </div>
+  <div class="strip-item reveal rd1">
+    <span class="strip-num">94°</span>
+    <span class="strip-label">Brew Temperature</span>
+  </div>
+  <div class="strip-item reveal rd2">
+    <span class="strip-num">12kg</span>
+    <span class="strip-label">Roaster Capacity</span>
+  </div>
+  <div class="strip-item reveal rd3">
+    <span class="strip-num">18h</span>
+    <span class="strip-label">Cold Brew Steep</span>
+  </div>
+</div>
+
+<!-- STORY -->
+<section class="story" id="story">
+  <div class="story-imgs reveal">
+    <div class="story-img-main">
+      <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=85" alt="Coffee craft" loading="lazy">
+    </div>
+    <div class="story-img-accent">
+      <img src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=600&q=85" alt="Coffee beans" loading="lazy">
+    </div>
+    <div class="story-gold-tag">Since 2009</div>
+  </div>
+
+  <div class="story-right">
+    <div class="s-eyebrow reveal">Our Philosophy</div>
+    <h2 class="s-title reveal">Coffee is a <em>conversation</em> with the land</h2>
+    <p class="story-body reveal">At Umber, we believe exceptional coffee begins long before the grinder. It starts at 1,800 metres above sea level, with farmers who tend their trees like family — because they are. Every cup translates the story of a specific hillside, a particular harvest season, a unique set of hands.</p>
+    <a href="#" class="btn-ghost reveal">Read our full story →</a>
+
+    <div class="story-stats reveal">
+      <div class="s-stat">
+        <span class="s-stat-n">15yrs</span>
+        <span class="s-stat-l">Of Direct Sourcing</span>
+      </div>
+      <div class="s-stat">
+        <span class="s-stat-n">4</span>
+        <span class="s-stat-l">Continents Sourced</span>
+      </div>
+      <div class="s-stat">
+        <span class="s-stat-n">100%</span>
+        <span class="s-stat-l">Traceable Beans</span>
+      </div>
+      <div class="s-stat">
+        <span class="s-stat-n">8</span>
+        <span class="s-stat-l">Locations in India</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MENU -->
+<section class="menu-sec" id="menu">
+  <div class="menu-header reveal">
+    <div>
+      <div class="s-eyebrow">What We Brew</div>
+      <h2 class="s-title">The <em>Menu</em></h2>
+    </div>
+    <div class="menu-tabs">
+      <button class="tab active">All</button>
+      <button class="tab">Espresso</button>
+      <button class="tab">Filter</button>
+      <button class="tab">Cold</button>
+    </div>
+  </div>
+
+  <div class="menu-grid">
+    <div class="m-card reveal">
+      <img class="m-img" src="https://images.unsplash.com/photo-1509785307050-d4066910ec1e?w=600&q=80" alt="Espresso" loading="lazy">
+      <div class="m-tag">Espresso · House Blend</div>
+      <div class="m-name">Signature Espresso</div>
+      <p class="m-desc">Bold and syrupy — dark chocolate, dried cherry, walnut finish. The soul of Umber in a single shot.</p>
+      <div class="m-footer"><span class="m-price">₹280</span><div class="m-add">+</div></div>
+    </div>
+
+    <div class="m-card reveal rd1">
+      <img class="m-img" src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600&q=80" alt="Pourover" loading="lazy">
+      <div class="m-tag">Filter · Single Origin</div>
+      <div class="m-name">Ethiopian Pourover</div>
+      <p class="m-desc">Yirgacheffe beans through a Hario V60 — bergamot, jasmine, clean lemon zest. Bright and extraordinary.</p>
+      <div class="m-footer"><span class="m-price">₹380</span><div class="m-add">+</div></div>
+    </div>
+
+    <div class="m-card reveal rd2">
+      <img class="m-img" src="https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=600&q=80" alt="Cold Brew" loading="lazy">
+      <div class="m-tag">Cold · Seasonal</div>
+      <div class="m-name">Cold Brew Reserve</div>
+      <p class="m-desc">18-hour slow steep in filtered water. Deep, naturally sweet, haunting notes of bourbon and dark cocoa.</p>
+      <div class="m-footer"><span class="m-price">₹340</span><div class="m-add">+</div></div>
+    </div>
+
+    <div class="m-card reveal">
+      <img class="m-img" src="https://images.unsplash.com/photo-1534687941688-651ccaafbff8?w=600&q=80" alt="Cortado" loading="lazy">
+      <div class="m-tag">Espresso · Classic</div>
+      <div class="m-name">Cortado</div>
+      <p class="m-desc">Equal parts espresso and silky steamed milk. Short, balanced, deeply satisfying for the discerning palate.</p>
+      <div class="m-footer"><span class="m-price">₹310</span><div class="m-add">+</div></div>
+    </div>
+
+    <div class="m-card reveal rd1">
+      <img class="m-img" src="https://images.unsplash.com/photo-1572119865084-43c285814d63?w=600&q=80" alt="Aeropress" loading="lazy">
+      <div class="m-tag">Filter · Tasting</div>
+      <div class="m-name">Aeropress Flight</div>
+      <p class="m-desc">Three origins, three techniques — a guided tasting journey through our current micro-lot roster.</p>
+      <div class="m-footer"><span class="m-price">₹520</span><div class="m-add">+</div></div>
+    </div>
+
+    <div class="m-card reveal rd2">
+      <img class="m-img" src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=600&q=80" alt="Nitro" loading="lazy">
+      <div class="m-tag">Cold · Signature</div>
+      <div class="m-name">Nitro Cold Brew</div>
+      <p class="m-desc">Nitrogen-infused, poured slow from the tap. Creamy, cascading, and utterly mesmerising to witness.</p>
+      <div class="m-footer"><span class="m-price">₹420</span><div class="m-add">+</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FULL BLEED -->
+<div class="full-bleed">
+  <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=1600&q=85" alt="Coffee atmosphere" loading="lazy">
+  <div class="full-bleed-overlay"></div>
+  <div class="full-bleed-content">
+    <h2 class="s-title reveal" style="text-align:center">"Every cup is a<br><em>meditation</em>"</h2>
+    <p class="full-bleed-quote reveal">The ritual of great coffee demands patience — the same patience our farmers give their trees.</p>
+  </div>
+</div>
+
+<!-- PROCESS -->
+<section class="process" id="process">
+  <div class="s-eyebrow reveal">How It's Made</div>
+  <h2 class="s-title reveal">The <em>Craft</em> Behind<br><strong>Every Cup</strong></h2>
+
+  <div class="process-grid">
+    <div class="proc-step reveal">
+      <span class="proc-num">01</span>
+      <span class="proc-icon">🌱</span>
+      <div class="proc-title">Farm Selection</div>
+      <p class="proc-text">We visit every farm we partner with. No brokers — direct relationships at altitude ensure traceable, ethical sourcing.</p>
+      <div class="proc-line"></div>
+    </div>
+    <div class="proc-step reveal rd1">
+      <span class="proc-num">02</span>
+      <span class="proc-icon">☀️</span>
+      <div class="proc-title">Harvest & Process</div>
+      <p class="proc-text">Hand-picked cherries processed through washed, natural, or honey methods that define each origin's distinct character.</p>
+      <div class="proc-line"></div>
+    </div>
+    <div class="proc-step reveal rd2">
+      <span class="proc-num">03</span>
+      <span class="proc-icon">🔥</span>
+      <div class="proc-title">Small-Batch Roast</div>
+      <p class="proc-text">Our 12kg roaster lets us profile each origin individually. Every roast is logged, cupped, and refined to perfection.</p>
+      <div class="proc-line"></div>
+    </div>
+    <div class="proc-step reveal rd3">
+      <span class="proc-num">04</span>
+      <span class="proc-icon">⚗️</span>
+      <div class="proc-title">Precision Brew</div>
+      <p class="proc-text">Grind size, water temp, ratio, timing — all calibrated per bean per day. Great coffee is repeatable craft, not luck.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ORIGIN -->
+<section class="origin-sec" id="origin">
+  <div class="origin-visual reveal">
+    <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&q=85" alt="Coffee origin farm" loading="lazy">
+    <div class="origin-badge">
+      <span class="origin-badge-num">4</span>
+      <span class="origin-badge-label">Continents Sourced</span>
+    </div>
+  </div>
+
+  <div class="origin-right reveal">
+    <div class="s-eyebrow">Where It Begins</div>
+    <h2 class="origin-list-title">Four continents,<br><em>one obsession</em></h2>
+    <p style="font-size:11px;line-height:2;color:rgba(242,232,213,.4);margin-bottom:44px">Each origin brings something unrepeatable — soil, altitude, microclimate, and the culture that shapes the hands that pick it.</p>
+
+    <div class="origin-rows">
+      <div class="o-row">
+        <div>
+          <span class="o-country">Ethiopia</span>
+          <span class="o-detail">Yirgacheffe · 1,900m altitude · Washed Process</span>
+        </div>
+        <span class="o-alt">Floral & Bright</span>
+      </div>
+      <div class="o-row">
+        <div>
+          <span class="o-country">Colombia</span>
+          <span class="o-detail">Huila · 1,750m altitude · Natural Process</span>
+        </div>
+        <span class="o-alt">Caramel & Fruit</span>
+      </div>
+      <div class="o-row">
+        <div>
+          <span class="o-country">Yemen</span>
+          <span class="o-detail">Haraaz · 2,100m altitude · Dry Process</span>
+        </div>
+        <span class="o-alt">Earthy & Complex</span>
+      </div>
+      <div class="o-row">
+        <div>
+          <span class="o-country">Sumatra</span>
+          <span class="o-detail">Mandheling · 1,400m altitude · Wet-Hulled</span>
+        </div>
+        <span class="o-alt">Full Body & Spice</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testi-sec">
+  <div class="s-eyebrow reveal">What People Say</div>
+  <h2 class="s-title reveal">The Umber <em>Experience</em></h2>
+
+  <div class="testi-grid">
+    <div class="t-card reveal">
+      <div class="t-stars">★★★★★</div>
+      <p class="t-text">"The Ethiopian pourover changed everything I thought I knew about coffee. It tastes like drinking a garden at sunrise."</p>
+      <div class="t-author">
+        <div class="t-av">A</div>
+        <div>
+          <span class="t-name">Anjali Mehta</span>
+          <span class="t-role">Food Writer, Mumbai</span>
+        </div>
+      </div>
+    </div>
+    <div class="t-card reveal rd1">
+      <div class="t-stars">★★★★★</div>
+      <p class="t-text">"I've been to specialty cafés across Tokyo and Vienna. Umber holds its own — exceptional sourcing, even better hospitality."</p>
+      <div class="t-author">
+        <div class="t-av">R</div>
+        <div>
+          <span class="t-name">Rohan Kapoor</span>
+          <span class="t-role">Architect, Bangalore</span>
+        </div>
+      </div>
+    </div>
+    <div class="t-card reveal rd2">
+      <div class="t-stars">★★★★★</div>
+      <p class="t-text">"The tasting flight is a revelation. Every cup is its own world. I return every weekend just for this ritual."</p>
+      <div class="t-author">
+        <div class="t-av">S</div>
+        <div>
+          <span class="t-name">Simran Bose</span>
+          <span class="t-role">Creative Director, Delhi</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-sec" id="cta">
+  <div class="cta-bg">
+    <img src="https://images.unsplash.com/photo-1521302200778-33500795e128?w=1600&q=85" alt="Coffee shop" loading="lazy">
+  </div>
+  <div class="cta-content">
+    <span class="cta-eyebrow reveal">Begin Your Ritual</span>
+    <h2 class="cta-title reveal">Come for coffee.<br>Stay for <em>everything.</em></h2>
+    <p class="cta-sub reveal">Open Mon–Fri 7am–8pm · Weekends 8am–9pm<br>New Delhi · Bangalore · Mumbai · Jaipur</p>
+    <div class="cta-btns reveal">
+      <a href="#" class="btn-gold">Find a Location</a>
+      <a href="#" class="btn-border">Order Beans Online</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <span class="f-brand">UMBER</span>
+      <p class="f-tagline">Specialty coffee roasted with intention, brewed with obsessive precision.</p>
+      <div class="f-socials">
+        <a href="#" class="f-soc">ig</a>
+        <a href="#" class="f-soc">fb</a>
+        <a href="#" class="f-soc">tw</a>
+        <a href="#" class="f-soc">yt</a>
+      </div>
+    </div>
+    <div class="f-col">
+      <h4>Menu</h4>
+      <ul>
+        <li><a href="#">Espresso Bar</a></li>
+        <li><a href="#">Filter Coffee</a></li>
+        <li><a href="#">Cold Brew</a></li>
+        <li><a href="#">Tasting Flights</a></li>
+        <li><a href="#">Food Menu</a></li>
+      </ul>
+    </div>
+    <div class="f-col">
+      <h4>Shop</h4>
+      <ul>
+        <li><a href="#">Whole Beans</a></li>
+        <li><a href="#">Subscriptions</a></li>
+        <li><a href="#">Brew Equipment</a></li>
+        <li><a href="#">Gift Cards</a></li>
+      </ul>
+    </div>
+    <div class="f-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Farm Partners</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Press</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="f-copy">© 2026 Umber Coffee Co. All rights reserved.</span>
+    <span class="f-copy">Roasted with love · Served with precision</span>
+  </div>
+</footer>
+
+<!-- ══════════════════════ SCRIPTS ══════════════════════ -->
+<script>
+/* ── Cursor ── */
+const cur = document.getElementById('cur');
+const curR = document.getElementById('cur-r');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; cur.style.left=mx+'px'; cur.style.top=my+'px'; });
+(function animR(){ rx+=(mx-rx)*.1; ry+=(my-ry)*.1; curR.style.left=rx+'px'; curR.style.top=ry+'px'; requestAnimationFrame(animR); })();
+document.querySelectorAll('a,button,.m-card,.o-row').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ cur.style.width='20px'; cur.style.height='20px'; curR.style.width='64px'; curR.style.height='64px'; });
+  el.addEventListener('mouseleave',()=>{ cur.style.width='8px'; cur.style.height='8px'; curR.style.width='40px'; curR.style.height='40px'; });
+});
+
+/* ── Nav scroll ── */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', ()=> nav.classList.toggle('scrolled', scrollY > 60));
+
+/* ── Scroll reveal ── */
+const revEls = document.querySelectorAll('.reveal');
+const ro = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); ro.unobserve(e.target); } });
+},{threshold:.1});
+revEls.forEach(el=>ro.observe(el));
+
+/* ── Menu tabs ── */
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{ document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); });
+});
+
+/* ══════════════ THREE.JS 3D Coffee Cup Scene ══════════════ */
+(function initThree(){
+  const canvas = document.getElementById('hero-canvas');
+  const W = window.innerWidth, H = window.innerHeight;
+  canvas.width = W; canvas.height = H;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x0A0603, 0.035);
+
+  const camera = new THREE.PerspectiveCamera(45, W/H, 0.1, 100);
+  camera.position.set(0, 1.5, 7);
+  camera.lookAt(0, 0.5, 0);
+
+  /* Lights */
+  const ambient = new THREE.AmbientLight(0x1A0F05, 0.8);
+  scene.add(ambient);
+
+  const keyLight = new THREE.SpotLight(0xC9952E, 8, 20, Math.PI/5, 0.5, 1.5);
+  keyLight.position.set(4, 8, 4);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(2048, 2048);
+  scene.add(keyLight);
+
+  const fillLight = new THREE.PointLight(0x3D1A08, 3, 15);
+  fillLight.position.set(-5, 2, 3);
+  scene.add(fillLight);
+
+  const rimLight = new THREE.PointLight(0xE4B84A, 4, 10);
+  rimLight.position.set(0, 4, -5);
+  scene.add(rimLight);
+
+  const groundLight = new THREE.PointLight(0xC9952E, 1.5, 8);
+  groundLight.position.set(0, -2, 2);
+  scene.add(groundLight);
+
+  /* Materials */
+  const cupMat = new THREE.MeshStandardMaterial({
+    color: 0x1A1008, roughness: 0.15, metalness: 0.85,
+    envMapIntensity: 1.2,
+  });
+
+  const saucerMat = new THREE.MeshStandardMaterial({
+    color: 0x100A05, roughness: 0.1, metalness: 0.9,
+  });
+
+  const goldMat = new THREE.MeshStandardMaterial({
+    color: 0xC9952E, roughness: 0.05, metalness: 0.95,
+  });
+
+  const coffeeMat = new THREE.MeshStandardMaterial({
+    color: 0x2A1205, roughness: 0.05, metalness: 0.0,
+  });
+
+  /* ── CUP body (lathe) ── */
+  const cupPts = [];
+  const cupProfile = [
+    [0.35, 0.0],[0.52, 0.1],[0.62, 0.3],[0.68, 0.55],
+    [0.72, 0.8],[0.75, 1.1],[0.78, 1.4],[0.80, 1.7],[0.80, 1.85]
+  ];
+  cupProfile.forEach(([x,y])=> cupPts.push(new THREE.Vector2(x, y)));
+  const cupGeo = new THREE.LatheGeometry(cupPts, 64);
+  const cup = new THREE.Mesh(cupGeo, cupMat);
+  cup.castShadow = true;
+  cup.position.set(1.8, -0.5, 0);
+
+  /* ── Cup interior ── */
+  const innerPts = [];
+  const innerProfile = [
+    [0.0,1.82],[0.33,1.82],[0.64,1.81],[0.70,1.5],
+    [0.68,1.1],[0.64,0.7],[0.58,0.4],[0.50,0.18],[0.36,0.06]
+  ];
+  innerProfile.forEach(([x,y])=> innerPts.push(new THREE.Vector2(x,y)));
+  const innerGeo = new THREE.LatheGeometry(innerPts, 64);
+  const inner = new THREE.Mesh(innerGeo, new THREE.MeshStandardMaterial({ color:0x0D0805, roughness:.6, metalness:.0 }));
+  inner.position.copy(cup.position);
+
+  /* ── Coffee liquid surface ── */
+  const coffeeGeo = new THREE.CylinderGeometry(0.62, 0.62, 0.04, 64);
+  const coffee = new THREE.Mesh(coffeeGeo, coffeeMat);
+  coffee.position.set(cup.position.x, cup.position.y + 1.58, cup.position.z);
+
+  /* ── Saucer ── */
+  const saucerPts = [];
+  const saucerProfile = [
+    [0.0,0.0],[0.5,0.0],[1.0,0.0],[1.2,0.02],
+    [1.35,0.06],[1.5,0.1],[1.52,0.14],[1.45,0.18],
+    [1.2,0.22],[0.9,0.24],[0.6,0.24],[0.3,0.24],[0.0,0.24]
+  ];
+  saucerProfile.forEach(([x,y])=>saucerPts.push(new THREE.Vector2(x,y)));
+  const saucerGeo = new THREE.LatheGeometry(saucerPts, 80);
+  const saucer = new THREE.Mesh(saucerGeo, saucerMat);
+  saucer.castShadow = true; saucer.receiveShadow = true;
+  saucer.position.set(cup.position.x, cup.position.y - 0.05, cup.position.z);
+
+  /* ── Handle ── */
+  const handleCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0.82, 1.5, 0),
+    new THREE.Vector3(1.25, 1.5, 0),
+    new THREE.Vector3(1.42, 1.25, 0),
+    new THREE.Vector3(1.42, 0.85, 0),
+    new THREE.Vector3(1.25, 0.62, 0),
+    new THREE.Vector3(0.82, 0.62, 0),
+  ]);
+  const handleGeo = new THREE.TubeGeometry(handleCurve, 30, 0.06, 12, false);
+  const handle = new THREE.Mesh(handleGeo, cupMat);
+  handle.position.copy(cup.position);
+
+  /* ── Gold rim ── */
+  const rimGeo = new THREE.TorusGeometry(0.82, 0.025, 16, 80);
+  const rim = new THREE.Mesh(rimGeo, goldMat);
+  rim.position.set(cup.position.x, cup.position.y + 1.88, cup.position.z);
+  rim.rotation.x = Math.PI/2;
+
+  /* ── Saucer gold rim ── */
+  const sRimGeo = new THREE.TorusGeometry(1.48, 0.018, 12, 80);
+  const sRim = new THREE.Mesh(sRimGeo, goldMat);
+  sRim.position.set(saucer.position.x, saucer.position.y + 0.14, saucer.position.z);
+  sRim.rotation.x = Math.PI/2;
+
+  /* ── Floating coffee beans ── */
+  const beanGeo = new THREE.SphereGeometry(0.08, 12, 8);
+  beanGeo.scale(1.0, 0.65, 0.55);
+  const beanMat = new THREE.MeshStandardMaterial({ color:0x3D1A08, roughness:.8, metalness:.1 });
+  const beans = [];
+  for(let i=0; i<12; i++){
+    const bean = new THREE.Mesh(beanGeo, beanMat);
+    const angle = (i/12)*Math.PI*2;
+    const r = 1.5 + Math.random()*2;
+    bean.position.set(
+      cup.position.x + Math.cos(angle)*r,
+      cup.position.y + Math.random()*3 - 1,
+      cup.position.z + Math.sin(angle)*r
+    );
+    bean.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
+    bean.userData = { ox:bean.position.x, oy:bean.position.y, oz:bean.position.z, speed:0.3+Math.random()*0.7, phase:Math.random()*Math.PI*2 };
+    scene.add(bean);
+    beans.push(bean);
+  }
+
+  /* ── Particle field ── */
+  const pCount = 200;
+  const pGeo = new THREE.BufferGeometry();
+  const pPos = new Float32Array(pCount*3);
+  for(let i=0;i<pCount;i++){
+    pPos[i*3]   = (Math.random()-.5)*16;
+    pPos[i*3+1] = (Math.random()-.5)*10;
+    pPos[i*3+2] = (Math.random()-.5)*10;
+  }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos,3));
+  const pMat = new THREE.PointsMaterial({ color:0xC9952E, size:0.03, transparent:true, opacity:.4 });
+  const particles = new THREE.Points(pGeo, pMat);
+  scene.add(particles);
+
+  /* ── Ground plane ── */
+  const groundGeo = new THREE.PlaneGeometry(20,20);
+  const groundMat = new THREE.MeshStandardMaterial({ color:0x0A0603, roughness:.9, metalness:.1 });
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI/2;
+  ground.position.y = -0.6;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  /* ── Group all cup parts ── */
+  const cupGroup = new THREE.Group();
+  cupGroup.add(cup, inner, coffee, saucer, handle, rim, sRim);
+  scene.add(cupGroup);
+
+  /* Mouse parallax */
+  let mouseX=0, mouseY=0;
+  document.addEventListener('mousemove', e=>{
+    mouseX = (e.clientX/window.innerWidth-.5)*2;
+    mouseY = (e.clientY/window.innerHeight-.5)*2;
+  });
+
+  /* Animate */
+  let t = 0;
+  function animate(){
+    requestAnimationFrame(animate);
+    t += 0.008;
+
+    /* Cup gentle float & rotate */
+    cupGroup.position.y = Math.sin(t*0.8)*0.08;
+    cupGroup.rotation.y = Math.sin(t*0.4)*0.12 + mouseX*0.15;
+    cupGroup.rotation.x = mouseY*0.06;
+
+    /* Coffee surface shimmer */
+    coffee.rotation.y += 0.005;
+
+    /* Beans orbit */
+    beans.forEach(b=>{
+      b.position.y = b.userData.oy + Math.sin(t*b.userData.speed + b.userData.phase)*0.3;
+      b.rotation.x += 0.005*b.userData.speed;
+      b.rotation.z += 0.003*b.userData.speed;
+    });
+
+    /* Particles drift */
+    particles.rotation.y += 0.0008;
+    particles.rotation.x += 0.0003;
+
+    /* Camera subtle parallax */
+    camera.position.x += (mouseX*0.8 - camera.position.x)*0.03;
+    camera.position.y += (-mouseY*0.5 + 1.5 - camera.position.y)*0.03;
+    camera.lookAt(0, 0.5, 0);
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize',()=>{
+    const w=window.innerWidth, h=window.innerHeight;
+    camera.aspect=w/h; camera.updateProjectionMatrix();
+    renderer.setSize(w,h);
+  });
+})();
+
+/* ══════════════ Steam Canvas 2D Particles ══════════════ */
+(function initSteam(){
+  const canvas = document.getElementById('steam-canvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+
+  const particles = Array.from({length:35},(_,i)=>({
+    x: window.innerWidth*0.62 + (Math.random()-.5)*80,
+    y: window.innerHeight*0.45 + (Math.random()-.5)*40,
+    vx: (Math.random()-.5)*.4,
+    vy: -.6-Math.random()*.8,
+    life: Math.random(),
+    maxLife: 0.6+Math.random()*.4,
+    size: 2+Math.random()*8,
+  }));
+
+  function drawSteam(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+      p.life += 0.004;
+      if(p.life >= p.maxLife){
+        p.life = 0;
+        p.x = window.innerWidth*0.62+(Math.random()-.5)*60;
+        p.y = window.innerHeight*0.46+(Math.random()-.5)*20;
+        p.vx=(Math.random()-.5)*.4;
+        p.vy=-.5-Math.random()*.6;
+      }
+      p.x += p.vx + Math.sin(p.life*8)*.3;
+      p.y += p.vy;
+      p.size += 0.06;
+
+      const prog = p.life/p.maxLife;
+      const alpha = prog < .3 ? prog/.3*.25 : (1-prog)*.25;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(228,184,74,${alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(drawSteam);
+  }
+  drawSteam();
+
+  window.addEventListener('resize',()=>{
+    canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  });
+})();
+
+/* ── Parallax on scroll ── */
+window.addEventListener('scroll', ()=>{
+  const sy = window.scrollY;
+  const heroContent = document.querySelector('.hero-content');
+  if(heroContent) heroContent.style.transform = `translateY(${sy*0.25}px)`;
+});
+</script>
+</body>
+</html>
