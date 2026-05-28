@@ -1,0 +1,627 @@
+# Luxury Premium Professional Portfolio — Drishti Manghnani
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drishti Manghnani | Luxury Portfolio</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:'Poppins',sans-serif;
+      scroll-behavior:smooth;
+    }
+
+    body{
+      background:#16110f;
+      color:white;
+      overflow-x:hidden;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      width:500px;
+      height:500px;
+      background:#8b5e3c;
+      filter:blur(180px);
+      top:-150px;
+      left:-120px;
+      opacity:0.35;
+      z-index:-1;
+    }
+
+    body::after{
+      content:"";
+      position:fixed;
+      width:500px;
+      height:500px;
+      background:#d4b08a;
+      filter:blur(180px);
+      bottom:-180px;
+      right:-100px;
+      opacity:0.22;
+      z-index:-1;
+    }
+
+    nav{
+      position:fixed;
+      width:100%;
+      top:0;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:22px 8%;
+      z-index:1000;
+
+      background:rgba(255,255,255,0.05);
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      backdrop-filter:blur(18px);
+    }
+
+    .logo{
+      font-size:28px;
+      font-weight:700;
+      letter-spacing:1px;
+    }
+
+    .logo span{
+      color:#d4b08a;
+    }
+
+    nav ul{
+      display:flex;
+      gap:30px;
+      list-style:none;
+    }
+
+    nav ul li a{
+      text-decoration:none;
+      color:white;
+      transition:0.3s;
+      font-size:15px;
+    }
+
+    nav ul li a:hover{
+      color:#d4b08a;
+    }
+
+    section{
+      padding:110px 8%;
+    }
+
+    .hero{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:60px;
+      flex-wrap:wrap;
+    }
+
+    .hero-content{
+      flex:1;
+      min-width:300px;
+    }
+
+    .tag{
+      width:max-content;
+      padding:10px 20px;
+      border-radius:40px;
+      margin-bottom:28px;
+
+      background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.1);
+      backdrop-filter:blur(15px);
+    }
+
+    .hero h1{
+      font-size:78px;
+      line-height:1.08;
+      margin-bottom:25px;
+    }
+
+    .hero h1 span{
+      color:#d4b08a;
+    }
+
+    .hero p{
+      color:#d6d6d6;
+      line-height:2;
+      max-width:650px;
+      margin-bottom:35px;
+      font-size:16px;
+    }
+
+    .buttons{
+      display:flex;
+      gap:20px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      padding:15px 32px;
+      border:none;
+      border-radius:50px;
+      cursor:pointer;
+      text-decoration:none;
+      transition:0.4s;
+      font-size:15px;
+      display:inline-block;
+    }
+
+    .primary{
+      background:linear-gradient(45deg,#8b5e3c,#d4b08a);
+      color:white;
+    }
+
+    .secondary{
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.1);
+      color:white;
+      backdrop-filter:blur(15px);
+    }
+
+    .btn:hover{
+      transform:translateY(-5px);
+    }
+
+    .hero-image{
+      flex:1;
+      display:flex;
+      justify-content:center;
+      min-width:300px;
+    }
+
+    .profile-card{
+      width:390px;
+      height:520px;
+      border-radius:35px;
+      overflow:hidden;
+
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.1);
+      backdrop-filter:blur(25px);
+
+      box-shadow:0 20px 60px rgba(0,0,0,0.45);
+
+      animation:float 5s ease-in-out infinite;
+    }
+
+    .profile-card img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    @keyframes float{
+      0%{transform:translateY(0px);} 
+      50%{transform:translateY(-15px);} 
+      100%{transform:translateY(0px);} 
+    }
+
+    .section-title{
+      text-align:center;
+      font-size:52px;
+      margin-bottom:65px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:30px;
+    }
+
+    .card{
+      padding:35px;
+      border-radius:30px;
+
+      background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.1);
+      backdrop-filter:blur(18px);
+
+      transition:0.4s;
+    }
+
+    .card:hover{
+      transform:translateY(-10px);
+    }
+
+    .card h3{
+      margin-bottom:16px;
+      font-size:24px;
+    }
+
+    .card p{
+      color:#d6d6d6;
+      line-height:1.9;
+      font-size:15px;
+    }
+
+    .about{
+      display:flex;
+      align-items:center;
+      gap:60px;
+      flex-wrap:wrap;
+    }
+
+    .about-content{
+      flex:1;
+      min-width:300px;
+    }
+
+    .about-content h2{
+      font-size:55px;
+      margin-bottom:20px;
+    }
+
+    .about-content p{
+      color:#d6d6d6;
+      line-height:2;
+      margin-bottom:20px;
+    }
+
+    .skills{
+      display:flex;
+      flex-wrap:wrap;
+      gap:15px;
+      margin-top:30px;
+    }
+
+    .skill{
+      padding:12px 20px;
+      border-radius:40px;
+
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .stats{
+      margin-top:40px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:20px;
+    }
+
+    .stat-box{
+      padding:25px;
+      border-radius:25px;
+      text-align:center;
+
+      background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .stat-box h3{
+      font-size:34px;
+      color:#d4b08a;
+      margin-bottom:10px;
+    }
+
+    .timeline{
+      position:relative;
+      max-width:900px;
+      margin:auto;
+    }
+
+    .timeline-item{
+      padding:30px;
+      margin-bottom:25px;
+      border-radius:25px;
+
+      background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.08);
+      backdrop-filter:blur(15px);
+    }
+
+    .timeline-item h3{
+      margin-bottom:10px;
+      color:#d4b08a;
+    }
+
+    .contact-box{
+      text-align:center;
+      padding:80px 40px;
+      border-radius:35px;
+
+      background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.08);
+      backdrop-filter:blur(18px);
+    }
+
+    .contact-box h2{
+      font-size:55px;
+      margin-bottom:20px;
+    }
+
+    .contact-box p{
+      color:#d6d6d6;
+      line-height:2;
+      max-width:700px;
+      margin:auto;
+      margin-bottom:35px;
+    }
+
+    footer{
+      padding:35px;
+      text-align:center;
+      border-top:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.03);
+      color:#d6d6d6;
+    }
+
+    @media(max-width:900px){
+
+      nav ul{
+        display:none;
+      }
+
+      .hero{
+        text-align:center;
+        justify-content:center;
+      }
+
+      .tag{
+        margin:auto;
+        margin-bottom:25px;
+      }
+
+      .buttons{
+        justify-content:center;
+      }
+
+      .hero h1{
+        font-size:52px;
+      }
+
+      .section-title,
+      .about-content h2,
+      .contact-box h2{
+        font-size:40px;
+      }
+
+      .stats{
+        grid-template-columns:1fr;
+      }
+
+    }
+
+  </style>
+</head>
+<body>
+
+  <nav>
+
+    <div class="logo">Drishti Manghnani<span></span></div>
+
+    <ul>
+      <li><a href="#home">Home</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+
+  </nav>
+
+  <section class="hero" id="home">
+
+    <div class="hero-content">
+
+      <div class="tag">
+        Web Designer • Creative Developer • Branding Enthusiast
+      </div>
+
+      <h1>
+        Crafting <span>Elegant Digital</span> Experiences.
+      </h1>
+
+      <p>
+        Hi, I'm Drishti Manghnani — a creative designer and developer passionate about building premium websites with luxury aesthetics, modern UI, smooth animations and visually refined experiences. I specialize in elegant web design, branding and digital creativity.
+      </p>
+
+      <div class="buttons">
+        <a href="#projects" class="btn primary">View Projects</a>
+        
+      </div>
+
+    </div>
+
+    <div class="hero-image">
+
+      <div class="profile-card">
+        <img src="WhatsApp Image 2026-05-25 at 21.01.03.jpeg" alt="Drishti Manghnani">
+      </div>
+
+    </div>
+
+  </section>
+
+  <section id="services">
+
+    <h2 class="section-title">Services</h2>
+
+    <div class="grid">
+
+      <div class="card">
+        <h3>🌐 Web Development</h3>
+        <p>
+          Responsive websites, luxury landing pages, portfolios, e-commerce stores and premium UI experiences with smooth interactions.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>🎨 Graphic Designing</h3>
+        <p>
+          Social media creatives, logos, posters, banners, thumbnails and aesthetic brand visuals.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>📊 Presentation Design</h3>
+        <p>
+          Professional PowerPoint presentations, pitch decks, academic presentations and modern templates.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>📱 Social Media Branding</h3>
+        <p>
+          Instagram branding, content aesthetics, promotional creatives and business social presence.
+        </p>
+      </div>
+
+    </div>
+
+  </section>
+
+  <section id="projects">
+
+    <h2 class="section-title">Featured Projects</h2>
+
+    <div class="grid">
+
+      <div class="card">
+        <h3>🛍 VogueVault by D</h3>
+        <p>
+          A premium fashion e-commerce website featuring modern UI, elegant shopping experience and luxury branding aesthetics.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>☕ Coffee Brand Website</h3>
+        <p>
+          Stylish café landing page with warm luxury colors, smooth design and premium coffeehouse branding.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>🏠 Real Estate Website</h3>
+        <p>
+          Elegant real estate platform designed with modern layouts, premium property showcases and clean UI.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>✨ Matrix of Life</h3>
+        <p>
+          Creative digital services brand focused on web development, branding, presentations and social media design.
+        </p>
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="about" id="about">
+
+    <div class="about-content">
+
+      <h2>About Me</h2>
+
+      <p>
+        I am a passionate creative developer and designer focused on creating visually impactful digital experiences. My style combines luxury aesthetics, minimal layouts and smooth modern interactions.
+      </p>
+
+      <p>
+        I enjoy transforming ideas into elegant websites that feel premium, professional and memorable. Along with web development, I also work on branding, presentations and graphic design.
+      </p>
+
+      <div class="skills">
+        <div class="skill">HTML</div>
+        <div class="skill">CSS</div>
+        <div class="skill">JavaScript</div>
+        <div class="skill">Responsive Design</div>
+        <div class="skill">Branding</div>
+        <div class="skill">Graphic Design</div>
+        <div class="skill">PowerPoint</div>
+      </div>
+
+      <div class="stats">
+
+        <div class="stat-box">
+          <h3>20+</h3>
+          <p>Projects</p>
+        </div>
+
+        <div class="stat-box">
+          <h3>100%</h3>
+          <p>Creative</p>
+        </div>
+
+        <div class="stat-box">
+          <h3>24/7</h3>
+          <p>Support</p>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <section id="experience">
+
+    <h2 class="section-title">Experience & Journey</h2>
+
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <h3>Creative Web Development</h3>
+        <p>
+          Designed multiple responsive websites including fashion stores, portfolios, café websites and business platforms.
+        </p>
+      </div>
+
+      <div class="timeline-item">
+        <h3>Branding & Designing</h3>
+        <p>
+          Worked on aesthetic social media branding, posters, logo concepts, thumbnails and modern digital creatives.
+        </p>
+      </div>
+
+      <div class="timeline-item">
+        <h3>Presentation & Academic Projects</h3>
+        <p>
+          Created premium presentation templates, reports and professional academic projects with modern visual layouts.
+        </p>
+      </div>
+
+    </div>
+
+  </section>
+
+  <section id="contact">
+
+    <div class="contact-box">
+
+      <h2>Let's Create Something Beautiful</h2>
+
+      <p>
+        Looking for a luxury website, elegant branding or premium creative design? Let's collaborate and build visually stunning digital experiences together.
+      </p>
+
+      <a href="#" class="btn primary">Contact Me</a>
+
+    </div>
+
+  </section>
+
+  <footer>
+    © 2026 Drishti Manghnani. All Rights Reserved.
+  </footer>
+
+</body>
+</html>
+```
